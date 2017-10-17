@@ -1,21 +1,7 @@
-# EjdbErlang
+# Ejdb for Elixir
 
-**TODO: Add description**
+This branch contains a failed attempt to build a `nif` automatically for EJDB using
+[nifty](http://parapluu.github.io/nifty/).
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ejdb_erlang` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:ejdb_erlang, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ejdb_erlang](https://hexdocs.pm/ejdb_erlang).
-
+The `mix.exs` configuration works, but it seems `EJDB` headers are too complicated
+for automated generation.
