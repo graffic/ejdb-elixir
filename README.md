@@ -1,5 +1,7 @@
 # Ejdb
 
+[![Build Status](https://travis-ci.org/graffic/ejdb-elixir.svg?branch=master)](https://travis-ci.org/graffic/ejdb-elixir)
+
 Elixir bindings for [EJDB](http://ejdb.org)
 
 ## Notes
