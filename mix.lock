@@ -1,0 +1,1 @@
+%{"libejdb": {:git, "https://github.com/Softmotions/ejdb.git", "3d200be528d54c44a7940176b8602dd7990a5411", [tag: "v1.2.12"]}}
