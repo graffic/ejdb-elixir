@@ -1,0 +1,5 @@
+%{"ejdb": {:git, "https://github.com/Softmotions/ejdb.git", "3d200be528d54c44a7940176b8602dd7990a5411", [tag: "v1.2.12"]},
+  "erlydtli": {:git, "https://github.com/erlydtl/erlydtl.git", "032746b8068f367eb63923cb6f8b2095065015b9", []},
+  "libejdb": {:git, "https://github.com/Softmotions/ejdb.git", "3d200be528d54c44a7940176b8602dd7990a5411", [tag: "v1.2.12"]},
+  "nifty": {:git, "https://github.com/parapluu/nifty.git", "3b10efb2017a7bc1efca83bfac50124310da0366", [branch: "master"]},
+  "rebar": {:git, "https://github.com/rebar/rebar.git", "b0a8a11414f5b839b9431e3a9ca5edae4550f569", [ref: "b0a8a11"]}}
