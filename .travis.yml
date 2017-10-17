@@ -1,0 +1,4 @@
+language: elixir
+branches:
+  except:
+    - feat/nifty
