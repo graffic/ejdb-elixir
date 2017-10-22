@@ -15,7 +15,7 @@ ifneq ($(OS),Windows_NT)
 endif
 
 
-.PHONY: libejdb priv/ejdb.so clean
+.PHONY: libejdb clean
 
 libejdb:
 	cd $(LIBEJDB_PATH) && \
