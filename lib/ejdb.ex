@@ -28,13 +28,11 @@ defmodule Ejdb do
   def jbotsync, do: 64
 
   @doc "Ejdblib version"
-  def version do
-    raise "Missing NIF"
-  end
+  def version, do: missing_nif()
 
   @doc "Open database"
   def open(filename, mode)
-  def open(_, _) do
-    raise "Missing NIF"
-  end
+  def open(_, _), do: missing_nif()
+
+  defp missing_nif, do: raise "Missing NIF"
 end

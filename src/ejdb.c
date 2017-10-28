@@ -8,6 +8,7 @@ typedef struct {
     EJDB *db;
 } DbResource;
 
+
 char *
 binary_to_char(ErlNifBinary *binary)
 {
@@ -17,8 +18,8 @@ binary_to_char(ErlNifBinary *binary)
     return str;
 }
 
-static ERL_NIF_TERM
-version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM
+nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     ErlNifBinary result;
     const char *output;
     int size;
@@ -30,13 +31,14 @@ version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_binary(env, &result);
 }
 
-static ERL_NIF_TERM
-open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM
+nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     unsigned int mode;
     char *db_name;
     bool did_open;
     ERL_NIF_TERM ret;
     ErlNifBinary argv_0;
+    EJDB *db;
     DbResource *resource;
 
     if (!enif_inspect_binary(env, argv[0], &argv_0)) {
@@ -49,7 +51,7 @@ open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
         return enif_make_badarg(env);
     }
 
-    EJDB *db = ejdbnew();
+    db = ejdbnew();
     if (db == NULL) {
         // Return tuple { :error, "message"}
         return 0;
@@ -69,12 +71,6 @@ open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return ret;
 }
 
-static ErlNifFunc
-nif_functions[] = {
-      { "version", 0, version },
-      { "open", 2, open }
-};
-
 static void
 free_db_resource(ErlNifEnv *env, void *resource) {
     DbResource *dbr = (DbResource *)resource;
@@ -82,7 +78,7 @@ free_db_resource(ErlNifEnv *env, void *resource) {
     ejdbdel(dbr->db);
 }
 
-static bool
+bool
 open_db_resource(ErlNifEnv *env) {
     const char* name = "DbConnection";
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
@@ -90,13 +86,3 @@ open_db_resource(ErlNifEnv *env) {
     DB_RESOURCE_TYPE = enif_open_resource_type(env, NULL, name, free_db_resource, flags, NULL);
     return (DB_RESOURCE_TYPE != NULL);
 }
-
-static int
-load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info) {
-    if(!open_db_resource(env)) {
-        return -1;
-    }
-    return 0;
-}
-
-ERL_NIF_INIT(Elixir.Ejdb, nif_functions, load, NULL, NULL, NULL)
