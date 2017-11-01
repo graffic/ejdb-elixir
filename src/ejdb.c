@@ -1,6 +1,7 @@
 #include <string.h>
 #include <erl_nif.h>
 #include <ejdb/ejdb.h>
+#include "utils.h"
 
 ErlNifResourceType* DB_RESOURCE_TYPE;
 
@@ -8,27 +9,9 @@ typedef struct {
     EJDB *db;
 } DbResource;
 
-
-char *
-binary_to_char(ErlNifBinary *binary)
-{
-    char *str = (char *) enif_alloc(binary->size + 1);
-    strncpy(str, (char *) binary->data, binary->size);
-    str[binary->size] = 0;
-    return str;
-}
-
 ERL_NIF_TERM
 nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ErlNifBinary result;
-    const char *output;
-    int size;
-
-    output = ejdbversion();
-    size = strlen(output);
-    enif_alloc_binary(size, &result);
-    memcpy(result.data, output, size);
-    return enif_make_binary(env, &result);
+    return char_to_binary(env, ejdbversion());
 }
 
 ERL_NIF_TERM
@@ -54,13 +37,21 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     db = ejdbnew();
     if (db == NULL) {
         // Return tuple { :error, "message"}
-        return 0;
+        return enif_make_tuple2(
+            env,
+            mk_atom(env, "error"),
+            char_to_binary(env, "ejdbnew failed")
+        );
     }
     did_open = ejdbopen(db, db_name, mode);
     enif_free(db_name);
     if (!did_open) {
         // Return tuple { :error, "message"}
-        return 0;
+        return enif_make_tuple2(
+            env,
+            mk_atom(env, "error"),
+            char_to_binary(env, "ejdbopen failed")
+        );
     }
     resource = enif_alloc_resource(DB_RESOURCE_TYPE, sizeof(DbResource));
     resource->db = db;
@@ -68,7 +59,7 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     ret = enif_make_resource(env, resource);
     enif_release_resource(resource);
     // Return tuple { :ok, connection }
-    return ret;
+    return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
 }
 
 static void
@@ -83,6 +74,7 @@ open_db_resource(ErlNifEnv *env) {
     const char* name = "DbConnection";
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
 
-    DB_RESOURCE_TYPE = enif_open_resource_type(env, NULL, name, free_db_resource, flags, NULL);
+    DB_RESOURCE_TYPE = enif_open_resource_type(
+        env, NULL, name, free_db_resource, flags, NULL);
     return (DB_RESOURCE_TYPE != NULL);
 }

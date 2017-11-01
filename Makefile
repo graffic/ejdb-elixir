@@ -9,9 +9,11 @@ CFLAGS += -I$(ERLANG_PATH) -I$(LIBEJDB_INSTALL)/include
 
 OBJDIR = priv
 SRCDIR = src
-C_SRCS = nif.c ejdb.c
+C_SRCS = nif.c ejdb.c utils.c
+H_DEPS = ejdb.h utils.h
 SRCS = $(addprefix $(SRCDIR)/,$(C_SRCS))
 OBJS = $(addprefix $(OBJDIR)/,$(C_SRCS:.c=.o))
+DEPS = $(addprefix $(SRCDIR)/,$(H_DEPS))
 
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
@@ -32,7 +34,7 @@ libejdb:
 	make && \
 	make install
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 priv/ejdb.so: $(OBJS)
