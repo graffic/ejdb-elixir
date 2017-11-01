@@ -43,4 +43,5 @@ priv/ejdb.so: $(OBJS)
 clean:
 	$(MIX) clean
 	make -C $(LIBEJDB_PATH)/build clean
+	rm -rf $(LIBEJDB_INSTALL)
 	rm -rf priv/ejdb.so priv/*.o
