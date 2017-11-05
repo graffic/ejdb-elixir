@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef ELIXIR_NIF_UTILS_H
+#define ELIXIR_NIF_UTILS_H
 
 ERL_NIF_TERM 
 mk_atom(ErlNifEnv* env, const char* atom);
@@ -10,4 +10,7 @@ binary_to_char(ErlNifBinary *binary);
 ERL_NIF_TERM
 char_to_binary(ErlNifEnv* env, const char* input);
 
-#endif /* UTILS_H */
+ERL_NIF_TERM
+ejdb_error(ErlNifEnv* env, DbResource *db);
+
+#endif /* ELIXIR_NIF_UTILS_H */

@@ -1,13 +1,10 @@
-#include <string.h>
-#include <erl_nif.h>
 #include <ejdb/ejdb.h>
+#include <erl_nif.h>
+#include <string.h>
+#include "ejdb.h"
 #include "utils.h"
 
 ErlNifResourceType* DB_RESOURCE_TYPE;
-
-typedef struct {
-    EJDB *db;
-} DbResource;
 
 ERL_NIF_TERM
 nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -17,7 +14,6 @@ nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 ERL_NIF_TERM
 nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     unsigned int mode;
-    char *db_name;
     bool did_open;
     ERL_NIF_TERM ret;
     ErlNifBinary argv_0;
@@ -27,7 +23,6 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     if (!enif_inspect_binary(env, argv[0], &argv_0)) {
         return enif_make_badarg(env);
     }
-    db_name = binary_to_char(&argv_0);
 
     if(!enif_get_uint(env, argv[1], &mode))
     {
@@ -43,8 +38,11 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
             char_to_binary(env, "ejdbnew failed")
         );
     }
+
+    char *db_name = binary_to_char(&argv_0);
     did_open = ejdbopen(db, db_name, mode);
     enif_free(db_name);
+
     if (!did_open) {
         // Return tuple { :error, "message"}
         return enif_make_tuple2(

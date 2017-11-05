@@ -34,5 +34,9 @@ defmodule Ejdb do
   def open(filename, mode)
   def open(_, _), do: missing_nif()
 
+  @doc "Create collection"
+  def create_collection(db, name, options \\ [])
+  def create_collection(_, _, _), do: missing_nif()
+
   defp missing_nif, do: raise "Missing NIF"
 end

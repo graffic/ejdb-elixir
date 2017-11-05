@@ -9,8 +9,8 @@ CFLAGS += -I$(ERLANG_PATH) -I$(LIBEJDB_INSTALL)/include
 
 OBJDIR = priv
 SRCDIR = src
-C_SRCS = nif.c ejdb.c utils.c
-H_DEPS = ejdb.h utils.h
+C_SRCS = nif.c ejdb.c utils.c ejcoll.c
+H_DEPS = ejdb.h utils.h ejcoll.h
 SRCS = $(addprefix $(SRCDIR)/,$(C_SRCS))
 OBJS = $(addprefix $(OBJDIR)/,$(C_SRCS:.c=.o))
 DEPS = $(addprefix $(SRCDIR)/,$(H_DEPS))

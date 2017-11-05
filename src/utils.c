@@ -1,5 +1,7 @@
 #include <erl_nif.h>
 #include <string.h>
+#include <ejdb/ejdb.h>
+#include "ejdb.h"
 
 /**
  * Makes an atom from existing or new
@@ -43,4 +45,17 @@ char_to_binary(ErlNifEnv* env, const char* input)
     enif_alloc_binary(size, &result);
     memcpy(result.data, input, size);
     return enif_make_binary(env, &result);
+}
+
+/**
+ * Makes a tuple of {:error, "EJDB description of the error"}
+ */
+ERL_NIF_TERM
+ejdb_error(ErlNifEnv* env, DbResource *db) {
+    const char *msg = ejdberrmsg(ejdbecode(db->db));
+    return enif_make_tuple2(
+        env,
+        mk_atom(env, "error"),
+        char_to_binary(env, msg)
+    );
 }

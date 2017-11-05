@@ -25,4 +25,10 @@ defmodule EjdbTest do
     {:ok, db} = Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
     assert is_reference db
   end
+
+  test "create a collection" do
+    {:ok, db} = Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
+    {:ok, coll} = Ejdb.create_collection(db, "potato")
+    assert is_reference coll
+  end
 end
