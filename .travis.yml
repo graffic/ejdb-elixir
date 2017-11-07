@@ -4,13 +4,12 @@ otp_release: '20.1'
 env:
   - MIX_ENV=test
 before_install:
-  - pip install --user cpp-coveralls
   - mix local.hex --force
   - mix local.rebar --force
 install: 
   - mix deps.get
 script:
-  - mix coveralls.travis
+  - mix coveralls.json
 after_success:
   - llvm-cov gcov priv/*.o
-  - coveralls -n
+  - bash <(curl -s https://codecov.io/bash)
