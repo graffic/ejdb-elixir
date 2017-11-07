@@ -21,6 +21,7 @@ defmodule Ejdb.Mixfile do
       app: :ejdb,
       version: "0.1.0",
       elixir: "~> 1.5",
+      test_coverage: [tool: ExCoveralls],
       compilers: [:ejdb_nif] ++ Mix.compilers,
       deps: deps()
     ]
@@ -40,7 +41,8 @@ defmodule Ejdb.Mixfile do
         tag: "v1.2.12",
         app: false,
         compile: "make -C ../.. libejdb"
-      }
+      },
+      {:excoveralls, "~> 0.7", only: :test}
     ]
   end
 end
