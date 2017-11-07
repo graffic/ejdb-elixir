@@ -3,7 +3,12 @@ defmodule Mix.Tasks.Compile.EjdbNif do
     if match? {:win32, _}, :os.type do
       :not_implemented
     else
-      {_, 0} = System.cmd "make", ["priv/ejdb.so"], stderr_to_stdout: true ,into: IO.stream(:stdio, :line)
+      {_, 0} = System.cmd(
+        "make",
+        ["COVERAGE=#{Mix.env == :test}", "priv/ejdb.so"],
+        stderr_to_stdout: true,
+        into: IO.stream(:stdio, :line)
+      )
     end
   end
 end

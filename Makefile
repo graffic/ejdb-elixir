@@ -2,7 +2,16 @@ MIX=mix
 CC=clang
 LIBEJDB_PATH=deps/libejdb
 LIBEJDB_INSTALL=$(LIBEJDB_PATH)/install_prefix
-CFLAGS=-O3 -std=c99 -pedantic -Wall
+CFLAGS = -std=c99 -pedantic -Wall
+
+ifeq ($(COVERAGE),true)
+	# LLVM
+	# CFLAGS += -fprofile-instr-generate -fcoverage-mapping
+	# GCOV
+	CFLAGS += -fprofile-arcs -ftest-coverage -g -O0
+else
+	CFLAGS += -O3
+endif
 
 ERLANG_PATH = $(shell erl -eval 'io:format("~s", [lists:concat([code:root_dir(), "/erts-", erlang:system_info(version), "/include"])])' -s init stop -noshell)
 CFLAGS += -I$(ERLANG_PATH) -I$(LIBEJDB_INSTALL)/include
