@@ -1,6 +1,8 @@
 #ifndef ELIXIR_NIF_UTILS_H
 #define ELIXIR_NIF_UTILS_H
 
+#include <erl_nif.h>
+
 ERL_NIF_TERM 
 mk_atom(ErlNifEnv* env, const char* atom);
 
