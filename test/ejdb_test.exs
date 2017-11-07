@@ -3,9 +3,11 @@ defmodule EjdbTest do
   use Bitwise
 
   @database_filename "tmp/testdb"
+  @collection_filename "tmp/testdb_potato"
   setup :clean_db
   def clean_db(_) do
     File.rm(@database_filename)
+    File.rm(@collection_filename)
     :ok
   end
 
@@ -13,7 +15,7 @@ defmodule EjdbTest do
     assert Ejdb.version() === "1.2.12"
   end
 
-  test "open db" do
+  test "create db file" do
     Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
     assert(File.exists?(@database_filename), "Database not created")
 
@@ -26,9 +28,15 @@ defmodule EjdbTest do
     assert is_reference db
   end
 
-  test "create a collection" do
+  test "create collection returns {:ok, collection}" do
     {:ok, db} = Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
     {:ok, coll} = Ejdb.create_collection(db, "potato")
     assert is_reference coll
+  end
+
+  test "create a collection file" do
+    {:ok, db} = Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
+    {:ok, _} = Ejdb.create_collection(db, "potato")
+    assert(File.exists?(@collection_filename), "Collection file not created")
   end
 end
