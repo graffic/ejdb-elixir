@@ -39,4 +39,11 @@ defmodule EjdbTest do
     {:ok, _} = Ejdb.create_collection(db, "potato")
     assert(File.exists?(@collection_filename), "Collection file not created")
   end
+
+  test "create collection with compressed" do
+    {:ok, db} = Ejdb.open(@database_filename, bor(Ejdb.jbocreat(), Ejdb.jbowriter()))
+    {:ok, coll} = Ejdb.create_collection(
+      db, "potato", compressed: true, large: true, records: 1024, cachedrecords: 1024)
+    assert is_reference coll
+  end
 end

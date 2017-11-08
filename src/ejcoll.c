@@ -33,8 +33,9 @@ parse_coll_opts(ErlNifEnv *env, EJCOLLOPTS *opts, const ERL_NIF_TERM opt_list) {
         return NULL;
     }
 
-    ERL_NIF_TERM head, tail;
-    while(enif_get_list_cell(env, opt_list, &head, &tail)) {
+    ERL_NIF_TERM current = opt_list, head, tail;
+    while(enif_get_list_cell(env, current, &head, &tail)) {
+        current = tail;
         int arity;
         const ERL_NIF_TERM *items;
         if(!enif_get_tuple(env, head, &arity, &items) || arity != 2) {
