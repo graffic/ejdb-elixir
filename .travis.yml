@@ -8,8 +8,9 @@ before_install:
   - mix local.rebar --force
 install: 
   - mix deps.get
+  - mix deps.compile
 script:
   - mix coveralls.json
 after_success:
   - llvm-cov gcov priv/*.o
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -X gcov
