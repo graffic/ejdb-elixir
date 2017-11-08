@@ -1,6 +1,7 @@
 # Ejdb
 
 [![Build Status](https://travis-ci.org/graffic/ejdb-elixir.svg?branch=master)](https://travis-ci.org/graffic/ejdb-elixir)
+[![Coverage Status](https://codecov.io/gh/graffic/ejdb-elixir/branch/master/graph/badge.svg)](https://codecov.io/gh/graffic/ejdb-elixir/list/master/)
 
 Elixir bindings for [EJDB](http://ejdb.org)
 
