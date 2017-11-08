@@ -19,4 +19,9 @@ load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info) {
     return 0;
 }
 
-ERL_NIF_INIT(Elixir.Ejdb, nif_functions, load, NULL, NULL, NULL)
+static int
+upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info) {
+    return load(env, priv_data, load_info);
+}
+
+ERL_NIF_INIT(Elixir.Ejdb, nif_functions, load, NULL, upgrade, NULL)
