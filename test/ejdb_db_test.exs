@@ -33,12 +33,12 @@ defmodule EjdbTest.DB do
   end
 
   test "open db returns {:ok, db}" do
-    {:ok, db} = Ejdb.open(@database_filename, [:jbocreat, :jbowriter])
+    {:ok, db} = Ejdb.open @database_filename, [:jbocreat, :jbowriter]
     assert is_reference db
   end
 
   test "fails to open a db {:error, message}" do
-    {:error, msg} = Ejdb.open(@database_filename, [:jbocreat])
+    {:error, msg} = Ejdb.open @database_filename, [:jbocreat]
     assert msg == "file not found"
   end
 end

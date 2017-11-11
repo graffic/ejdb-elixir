@@ -46,17 +46,3 @@ char_to_binary(ErlNifEnv* env, const char* input)
     memcpy(result.data, input, size);
     return enif_make_binary(env, &result);
 }
-
-/**
- * It returns a string and not an atom due to the many error levels the error 
- * code can take: ejdb and tc error codes. Too much work for now.
- */
-ERL_NIF_TERM
-ejdb_error(ErlNifEnv* env, DbResource *db) {
-    const char *msg = ejdberrmsg(ejdbecode(db->db));
-    return enif_make_tuple2(
-        env,
-        mk_atom(env, "error"),
-        char_to_binary(env, msg)
-    );
-}

@@ -92,7 +92,7 @@ nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     enif_free(coll_name);
 
     if(coll == NULL) {
-        return ejdb_error(env, db);
+        return ejdb_error_tuple(env, db);
     }
 
     CollResource *resource = enif_alloc_resource(

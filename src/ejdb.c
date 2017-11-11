@@ -4,7 +4,7 @@
 #include "ejdb.h"
 #include "utils.h"
 
-ErlNifResourceType* DB_RESOURCE_TYPE;
+ErlNifResourceType *DB_RESOURCE_TYPE;
 
 ERL_NIF_TERM
 nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
@@ -49,15 +49,19 @@ parse_db_opts(ErlNifEnv *env, const ERL_NIF_TERM opt_list) {
     return mode;
 }
 
+/**
+ * It returns a string and not an atom due to the many error levels the error 
+ * code can take: ejdb and tc error codes. Too much work for now.
+ */
+ERL_NIF_TERM
+ejdb_error_tuple(ErlNifEnv* env, DbResource *db) {
+    const char *msg = ejdberrmsg(ejdbecode(db->db));
+    return ERROR_MSG_TUPLE(env, msg);
+}
+
 ERL_NIF_TERM
 nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    unsigned int mode;
-    bool did_open;
-    ERL_NIF_TERM ret;
     ErlNifBinary argv_0;
-    EJDB *db;
-    DbResource *resource;
-
     if (!enif_inspect_binary(env, argv[0], &argv_0)) {
         return enif_make_badarg(env);
     }
@@ -66,31 +70,26 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     {
         return enif_make_badarg(env);
     }
-    mode = parse_db_opts(env, argv[1]);
+    unsigned int mode = parse_db_opts(env, argv[1]);
 
-    db = ejdbnew();
-    if (db == NULL) {
-        // Return tuple { :error, "message"}
-        return enif_make_tuple2(
-            env,
-            mk_atom(env, "error"),
-            char_to_binary(env, "ejdbnew failed")
-        );
+    EJDB *db = ejdbnew();
+    if(db == NULL) {
+        return ERROR_MSG_TUPLE(env, "error in ejdbnew"); 
     }
 
     char *db_name = binary_to_char(&argv_0);
-    did_open = ejdbopen(db, db_name, mode);
+    bool did_open = ejdbopen(db, db_name, mode);
     enif_free(db_name);
 
     if (!did_open) {
         // Return tuple { :error, "message"}
         DbResource tmp = {db};
-        return ejdb_error(env, &tmp);
+        return ejdb_error_tuple(env, &tmp);
     }
-    resource = enif_alloc_resource(DB_RESOURCE_TYPE, sizeof(DbResource));
+    DbResource *resource = enif_alloc_resource(DB_RESOURCE_TYPE, sizeof(DbResource));
     resource->db = db;
 
-    ret = enif_make_resource(env, resource);
+    ERL_NIF_TERM ret = enif_make_resource(env, resource);
     enif_release_resource(resource);
     // Return tuple { :ok, connection }
     return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
