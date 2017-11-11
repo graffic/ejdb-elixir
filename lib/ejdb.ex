@@ -12,25 +12,24 @@ defmodule Ejdb do
     :ok = :erlang.load_nif(path, 0)
   end
 
-  @doc "Open as a reader"
-  def jboreader, do: 1
-  @doc "Open as a writer"
-  def jbowriter, do: 2
-  @doc "Create if db file not exists"
-  def jbocreat, do: 4
-  @doc "Truncate db on open."
-  def jbotrunc, do: 8
-  @doc "Open without locking"
-  def jbonolck, do: 16
-  @doc "Lock without blocking"
-  def jbolcknb, do: 32
-  @doc "Synchronize every transaction"
-  def jbotsync, do: 64
+  
 
   @doc "Ejdblib version"
   def version, do: missing_nif()
 
-  @doc "Open database"
+  @doc """
+  Open database with name `name`
+  
+  The opening `mode` is given as a list of atoms:
+  - :jboreader Open as a reader
+  - :jbowriter Open as a writer
+  - :jbocreat Create if db file not exists
+  - :jbotrunc Truncate db on open.
+  - :jbonolck Open without locking
+  - :jbolcknb Lock without blocking
+  - :jbotsync Synchronize every transaction
+  """
+  @spec open(binary, list(atom)) :: {:ok, reference} | {:error, binary}
   def open(filename, mode)
   def open(_, _), do: missing_nif()
 

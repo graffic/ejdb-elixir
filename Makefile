@@ -54,3 +54,4 @@ clean:
 	make -C $(LIBEJDB_PATH)/build clean
 	rm -rf $(LIBEJDB_INSTALL)
 	rm -rf priv/ejdb.so priv/*.o priv/*.gcda priv/*.gcno
+	rm *.gcov

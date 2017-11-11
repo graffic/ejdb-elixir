@@ -48,7 +48,8 @@ char_to_binary(ErlNifEnv* env, const char* input)
 }
 
 /**
- * Makes a tuple of {:error, "EJDB description of the error"}
+ * It returns a string and not an atom due to the many error levels the error 
+ * code can take: ejdb and tc error codes. Too much work for now.
  */
 ERL_NIF_TERM
 ejdb_error(ErlNifEnv* env, DbResource *db) {

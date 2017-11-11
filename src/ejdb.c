@@ -11,6 +11,44 @@ nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return char_to_binary(env, ejdbversion());
 }
 
+static char *open_options[] = {
+    "jboreader",    /**< 0 Open as a reader. */
+    "jbowriter",     /**< 1 Open as a writer. */
+    "jbocreat",     /**< 2 Create if db file not exists. */
+    "jbotrunc",     /**< 3 Truncate db on open. */
+    "jbonolck",     /**< 4 Open without locking. */
+    "jbolcknb",     /**< 5 Lock without blocking. */
+    "jbotsync"      /**< 6 Synchronize every transaction. */
+};
+
+/**
+ * Parses a list of atoms with ejdb open modes
+ * @param env NIF environment
+ * @param opt_list List with atoms.
+ * @return The final open mode
+ */
+static unsigned int
+parse_db_opts(ErlNifEnv *env, const ERL_NIF_TERM opt_list) {
+    unsigned int mode = 0;
+    ERL_NIF_TERM current = opt_list, head, tail;
+    while(enif_get_list_cell(env, current, &head, &tail)) {
+        current = tail;
+
+        char option[10];
+        if(!enif_get_atom(env, head, option, 10, ERL_NIF_LATIN1)) {
+            continue;
+        }
+
+        for(int i=0; i < 7; i++) {
+            if(strcmp(option, open_options[i]) == 0) {
+                mode |= 1 << i;
+                break;
+            }
+        }
+    }
+    return mode;
+}
+
 ERL_NIF_TERM
 nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     unsigned int mode;
@@ -24,10 +62,11 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
         return enif_make_badarg(env);
     }
 
-    if(!enif_get_uint(env, argv[1], &mode))
+    if(!enif_is_list(env, argv[1]))
     {
         return enif_make_badarg(env);
     }
+    mode = parse_db_opts(env, argv[1]);
 
     db = ejdbnew();
     if (db == NULL) {
@@ -45,11 +84,8 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
     if (!did_open) {
         // Return tuple { :error, "message"}
-        return enif_make_tuple2(
-            env,
-            mk_atom(env, "error"),
-            char_to_binary(env, "ejdbopen failed")
-        );
+        DbResource tmp = {db};
+        return ejdb_error(env, &tmp);
     }
     resource = enif_alloc_resource(DB_RESOURCE_TYPE, sizeof(DbResource));
     resource->db = db;
