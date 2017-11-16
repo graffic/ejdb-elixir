@@ -5,7 +5,8 @@ static ErlNifFunc
 nif_functions[] = {
       { "version", 0, nif_ejdb_version },
       { "open", 2, nif_ejdb_open },
-      { "create_collection", 3, nif_ejdb_createcoll }
+      { "create_collection", 3, nif_ejdb_createcoll },
+      { "save_bson", 2, nif_ejdb_savebson }
 };
 
 static int

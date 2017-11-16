@@ -11,6 +11,12 @@ ERL_NIF_TERM
 nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 /**
+ * Save a marshalled bson into a collection
+ */
+ERL_NIF_TERM
+nif_ejdb_savebson(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
+/**
  * Sets the COLL_RESOURCE_TYPE for column resources
  */ 
 bool

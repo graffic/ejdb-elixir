@@ -42,7 +42,8 @@ defmodule Ejdb.Mixfile do
         app: false,
         compile: "make -C ../.. libejdb"
       },
-      {:excoveralls, "~> 0.7", only: :test}
+      {:excoveralls, "~> 0.7", only: :test},
+      {:bson, "~> 0.4.4", only: :test}
     ]
   end
 end

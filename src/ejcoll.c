@@ -1,4 +1,5 @@
 #include <ejdb/ejdb.h>
+#include <ejdb/bson.h>
 #include <string.h>
 #include <erl_nif.h>
 #include "ejdb.h"
@@ -7,16 +8,39 @@
 ErlNifResourceType* COLL_RESOURCE_TYPE;
 
 typedef struct {
+    DbResource *db_resource;
     EJCOLL *coll;
 } CollResource;
 
+
+
 ERL_NIF_TERM
-nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return enif_make_badarg(env);
+nif_ejdb_savebson(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    CollResource *res;
+    if(!enif_get_resource(env, argv[0], COLL_RESOURCE_TYPE, (void**) &res)) {
+        return enif_make_badarg(env);
+    }
+
+    ErlNifBinary bson_arg;
+    if (!enif_inspect_binary(env, argv[1], &bson_arg)) {
+        return enif_make_badarg(env);
+    }
+
+    bson_oid_t oid;
+    ejdbsavebson3(res->coll, bson_arg.data, &oid, false);
+
+    char buffer[25];
+    bson_oid_to_string(&oid, buffer);
+
+    return enif_make_tuple2(
+        env,
+        mk_atom(env, "ok"),
+        char_to_binary(env, buffer)
+    );
 }
 
 ERL_NIF_TERM
-nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_badarg(env);
 }
 
@@ -69,6 +93,11 @@ parse_coll_opts(ErlNifEnv *env, EJCOLLOPTS *opts, const ERL_NIF_TERM opt_list) {
 }
 
 ERL_NIF_TERM
+nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_badarg(env);
+}
+
+ERL_NIF_TERM
 nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     DbResource *db;
     if(!enif_get_resource(env, argv[0], DB_RESOURCE_TYPE, (void**) &db)) {
@@ -98,6 +127,10 @@ nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     CollResource *resource = enif_alloc_resource(
         COLL_RESOURCE_TYPE, sizeof(CollResource));
     resource->coll = coll;
+    // Keep a reference to release_resource when we free the collection
+    resource->db_resource = db;
+    enif_keep_resource(db);
+
     ERL_NIF_TERM ret = enif_make_resource(env, resource);
     enif_release_resource(resource);
     return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
@@ -108,12 +141,18 @@ nif_ejdb_rmcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_badarg(env);
 }
 
+static void
+free_coll_resource(ErlNifEnv *env, void *resource) {
+    CollResource *cr = (CollResource *)resource;
+    enif_release_resource(cr->db_resource);
+}
+
 bool
 open_coll_resource(ErlNifEnv *env) {
     const char* name = "EJCOLL";
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
 
     COLL_RESOURCE_TYPE = enif_open_resource_type(
-        env, NULL, name, NULL, flags, NULL);
+        env, NULL, name, free_coll_resource, flags, NULL);
     return (COLL_RESOURCE_TYPE != NULL);
 }

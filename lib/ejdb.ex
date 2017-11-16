@@ -37,5 +37,9 @@ defmodule Ejdb do
   def create_collection(db, name, options \\ [])
   def create_collection(_, _, _), do: missing_nif()
 
+  @doc "Save a marshalled bson into a collection"
+  def save_bson(collection, bson)
+  def save_bson(_, _), do: missing_nif()
+
   defp missing_nif, do: raise "Missing NIF"
 end

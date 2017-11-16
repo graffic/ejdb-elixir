@@ -27,3 +27,6 @@ erl_crash.dump
 
 # vscode
 /.vscode/
+
+# gcov
+*.gcov

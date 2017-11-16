@@ -8,7 +8,8 @@ ifeq ($(COVERAGE),true)
 	# LLVM
 	# CFLAGS += -fprofile-instr-generate -fcoverage-mapping
 	# GCOV
-	CFLAGS += -fprofile-arcs -ftest-coverage -g -O0
+	#CFLAGS += -fprofile-arcs -ftest-coverage -g -O0
+	CFLAGS += -g -O0
 else
 	CFLAGS += -O3
 endif
