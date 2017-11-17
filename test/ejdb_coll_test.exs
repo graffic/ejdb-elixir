@@ -70,6 +70,16 @@ defmodule EjdbTest.Coll do
     assert is_reference coll
   end
 
+  test "get all collections (no collections)", context do
+    [] = Ejdb.get_collections context.db
+  end
+
+  test "get all collections", context do
+    {:ok, _} = Ejdb.create_collection context.db, "potato"
+
+    [_] = Ejdb.get_collections context.db
+  end
+
   test "save to a collection", context do
     {:ok, coll} = Ejdb.create_collection(context.db, "potato")
 

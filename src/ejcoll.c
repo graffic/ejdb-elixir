@@ -87,7 +87,7 @@ parse_coll_opts(ErlNifEnv *env, EJCOLLOPTS *opts, const ERL_NIF_TERM opt_list) {
 }
 
 static ERL_NIF_TERM
-tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
+make_coll_resource(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
     CollResource *resource = enif_alloc_resource(
         COLL_RESOURCE_TYPE, sizeof(CollResource));
     resource->coll = coll;
@@ -97,7 +97,20 @@ tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
 
     ERL_NIF_TERM ret = enif_make_resource(env, resource);
     enif_release_resource(resource);
-    return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
+
+    return ret;
+}
+
+/**
+ * Creates a tuple with {:ok, collection}
+ */
+static ERL_NIF_TERM
+tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
+    return enif_make_tuple2(
+        env,
+        mk_atom(env, "ok"),
+        make_coll_resource(env, db, coll)
+    );
 }
 
 #define ARG_BINARY(dest, index) \
@@ -108,7 +121,18 @@ tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
 
 ERL_NIF_TERM
 nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return enif_make_badarg(env);
+    ARG_DB_RESOURCE(dbr, 0)
+
+    TCLIST *colls = ejdbgetcolls(dbr->db);
+    ERL_NIF_TERM *res = enif_alloc(sizeof(ERL_NIF_TERM) * colls->num);
+    for(int i=0; i<colls->num; i++) {
+        res[i] = make_coll_resource(env, dbr, (EJCOLL *) colls->array[i].ptr);
+    }
+
+    ERL_NIF_TERM ret = enif_make_list_from_array(env, res, colls->num);
+    enif_free(res);
+
+    return ret;
 }
 
 ERL_NIF_TERM
@@ -154,10 +178,10 @@ nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return tuple_with_coll(env, dbr, coll);
 }
 
-ERL_NIF_TERM
-nif_ejdb_rmcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return enif_make_badarg(env);
-}
+// ERL_NIF_TERM
+// nif_ejdb_rmcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+//     return enif_make_badarg(env);
+// }
 
 static void
 free_coll_resource(ErlNifEnv *env, void *resource) {

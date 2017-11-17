@@ -8,6 +8,7 @@ nif_functions[] = {
       { "close", 1 , nif_ejdb_close },
       { "create_collection", 3, nif_ejdb_createcoll },
       { "get_collection", 2, nif_ejdb_getcoll },
+      { "get_collections", 1, nif_ejdb_getcolls },
       { "save_bson", 2, nif_ejdb_savebson }
 };
 

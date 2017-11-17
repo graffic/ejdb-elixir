@@ -44,6 +44,10 @@ defmodule Ejdb do
   def get_collection(db, name)
   def get_collection(_, _), do: missing_nif()
 
+  @doc "Get all collections"
+  def get_collections(db)
+  def get_collections(_), do: missing_nif()
+
   @doc "Save a marshalled bson into a collection"
   def save_bson(collection, bson)
   def save_bson(_, _), do: missing_nif()
