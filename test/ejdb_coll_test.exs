@@ -23,7 +23,7 @@ defmodule EjdbTest.Coll do
 
   test "create a collection file", context do
     {:ok, _} = Ejdb.create_collection context.db, "potato"
-    assert(File.exists?(@collection_filename), "Collection file not created")
+    assert File.exists?(@collection_filename), "Collection file not created"
   end
 
   test "create collection with parameters", context do
@@ -42,6 +42,11 @@ defmodule EjdbTest.Coll do
     assert_raise ArgumentError, "argument error", fn ->
       Ejdb.create_collection context.db, 42
     end
+  end
+
+  test "create collection wrong coll name", context do
+    {:error, msg} = Ejdb.create_collection context.db, "a.dot"
+    assert msg == "invalid collection name"
   end
 
   test "create collection with wrong options", context do
