@@ -128,6 +128,7 @@ nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     for(int i=0; i<colls->num; i++) {
         res[i] = make_coll_resource(env, dbr, (EJCOLL *) colls->array[i].ptr);
     }
+    tclistdel(colls);
 
     ERL_NIF_TERM ret = enif_make_list_from_array(env, res, colls->num);
     enif_free(res);
