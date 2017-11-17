@@ -1,5 +1,5 @@
 defmodule EjdbTest.Coll do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
 
   @database_filename "tmp/testdb"
   @collection_filename "tmp/testdb_potato"
@@ -44,6 +44,16 @@ defmodule EjdbTest.Coll do
     end
   end
 
+  test "create collection with wrong options", context do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.create_collection context.db, "potato", 42
+    end
+  end
+
+  test "create collection with invalid options", context do
+    {:ok, _} = Ejdb.create_collection context.db, "potato", [42, {42}, {42, 42}]
+  end
+
   test "get a non existent collection", context do
     {:error, msg} = Ejdb.get_collection context.db, "potato"
     assert msg == "Collection does not exist"
@@ -65,5 +75,21 @@ defmodule EjdbTest.Coll do
 
     {:ok, oid} = Ejdb.save_bson(coll, Bson.encode %{spam: "eggs"})
     assert String.length(oid) == 24
+  end
+
+  test "save to a collection with wrong coll", context do
+    {:ok, _} = Ejdb.create_collection context.db, "potato"
+
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.save_bson "spam", Bson.encode %{spam: "eggs"}
+    end
+  end
+
+  test "save to a collection with wrong bson", context do
+    {:ok, coll} = Ejdb.create_collection context.db, "potato"
+
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.save_bson coll, 42
+    end
   end
 end

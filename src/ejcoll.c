@@ -86,7 +86,7 @@ parse_coll_opts(ErlNifEnv *env, EJCOLLOPTS *opts, const ERL_NIF_TERM opt_list) {
     return opts;
 }
 
-static __inline__ ERL_NIF_TERM
+static ERL_NIF_TERM
 tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
     CollResource *resource = enif_alloc_resource(
         COLL_RESOURCE_TYPE, sizeof(CollResource));
