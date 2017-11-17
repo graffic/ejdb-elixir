@@ -33,9 +33,16 @@ defmodule Ejdb do
   def open(filename, mode)
   def open(_, _), do: missing_nif()
 
+  def close(database)
+  def close(_), do: missing_nif()
+
   @doc "Create collection"
   def create_collection(db, name, options \\ [])
   def create_collection(_, _, _), do: missing_nif()
+
+  @doc "Get an existing collection"
+  def get_collection(db, name)
+  def get_collection(_, _), do: missing_nif()
 
   @doc "Save a marshalled bson into a collection"
   def save_bson(collection, bson)

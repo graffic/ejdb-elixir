@@ -13,7 +13,6 @@ typedef struct {
 } CollResource;
 
 
-
 ERL_NIF_TERM
 nif_ejdb_savebson(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     CollResource *res;
@@ -37,11 +36,6 @@ nif_ejdb_savebson(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
         mk_atom(env, "ok"),
         char_to_binary(env, buffer)
     );
-}
-
-ERL_NIF_TERM
-nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return enif_make_badarg(env);
 }
 
 /**
@@ -92,38 +86,8 @@ parse_coll_opts(ErlNifEnv *env, EJCOLLOPTS *opts, const ERL_NIF_TERM opt_list) {
     return opts;
 }
 
-ERL_NIF_TERM
-nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    return enif_make_badarg(env);
-}
-
-ERL_NIF_TERM
-nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    DbResource *db;
-    if(!enif_get_resource(env, argv[0], DB_RESOURCE_TYPE, (void**) &db)) {
-        return enif_make_badarg(env);
-    }
-
-    ErlNifBinary argv_1;
-    if (!enif_inspect_binary(env, argv[1], &argv_1)) {
-        return enif_make_badarg(env);
-    }
-
-    if(!enif_is_list(env, argv[2]))
-    {
-        return enif_make_badarg(env);
-    }
-    EJCOLLOPTS empty_opts = {0};
-    EJCOLLOPTS *opts = parse_coll_opts(env, &empty_opts, argv[2]);
-
-    char *coll_name = binary_to_char(&argv_1);
-    EJCOLL *coll = ejdbcreatecoll(db->db, coll_name, opts);
-    enif_free(coll_name);
-
-    if(coll == NULL) {
-        return ejdb_error_tuple(env, db);
-    }
-
+static __inline__ ERL_NIF_TERM
+tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
     CollResource *resource = enif_alloc_resource(
         COLL_RESOURCE_TYPE, sizeof(CollResource));
     resource->coll = coll;
@@ -134,6 +98,60 @@ nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     ERL_NIF_TERM ret = enif_make_resource(env, resource);
     enif_release_resource(resource);
     return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
+}
+
+#define ARG_BINARY(dest, index) \
+    ErlNifBinary dest; \
+    if (!enif_inspect_binary(env, argv[index], &argv_1)) {\
+        return enif_make_badarg(env);\
+    }
+
+ERL_NIF_TERM
+nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    return enif_make_badarg(env);
+}
+
+ERL_NIF_TERM
+nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ARG_DB_RESOURCE(dbr, 0)
+    ARG_BINARY(argv_1, 1)
+
+    char *coll_name = binary_to_char(&argv_1);
+    EJCOLL *coll = ejdbgetcoll(dbr->db, coll_name);
+    enif_free(coll_name);
+
+    if(coll == NULL) {
+        return enif_make_tuple2(
+            env,
+            mk_atom(env, "error"),
+            char_to_binary(env, "Collection does not exist")
+        );
+    }
+
+    return tuple_with_coll(env, dbr, coll);
+}
+
+ERL_NIF_TERM
+nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ARG_DB_RESOURCE(dbr, 0)
+    ARG_BINARY(argv_1, 1)
+
+    if(!enif_is_list(env, argv[2]))
+    {
+        return enif_make_badarg(env);
+    }
+    EJCOLLOPTS empty_opts = {0};
+    EJCOLLOPTS *opts = parse_coll_opts(env, &empty_opts, argv[2]);
+
+    char *coll_name = binary_to_char(&argv_1);
+    EJCOLL *coll = ejdbcreatecoll(dbr->db, coll_name, opts);
+    enif_free(coll_name);
+
+    if(coll == NULL) {
+        return ejdb_error_tuple(env, dbr);
+    }
+
+    return tuple_with_coll(env, dbr, coll);
 }
 
 ERL_NIF_TERM

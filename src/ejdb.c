@@ -95,6 +95,14 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return enif_make_tuple2(env, mk_atom(env, "ok"), ret);
 }
 
+ERL_NIF_TERM
+nif_ejdb_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+    ARG_DB_RESOURCE(dbr, 0)
+    bool closed = ejdbclose(dbr->db);
+
+    return closed ? mk_atom(env, "ok") : mk_atom(env, "error");
+}
+
 static void
 free_db_resource(ErlNifEnv *env, void *resource) {
     DbResource *dbr = (DbResource *)resource;

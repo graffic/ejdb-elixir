@@ -11,6 +11,12 @@ typedef struct {
 
 extern ErlNifResourceType* DB_RESOURCE_TYPE;
 
+#define ARG_DB_RESOURCE(db, index) \
+    DbResource *db;\
+    if(!enif_get_resource(env, argv[index], DB_RESOURCE_TYPE, (void**) &db)) {\
+        return enif_make_badarg(env);\
+    }
+
 ERL_NIF_TERM
 nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -26,6 +32,9 @@ ejdb_error_tuple(ErlNifEnv* env, DbResource *db);
 
 ERL_NIF_TERM
 nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
+ERL_NIF_TERM
+nif_ejdb_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 bool
 open_db_resource(ErlNifEnv *env);
