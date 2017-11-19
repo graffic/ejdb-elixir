@@ -1,5 +1,5 @@
-defmodule EjdbTest.Coll do
-  use ExUnit.Case
+defmodule EjdbTest.Coll.Template do
+  use ExUnit.CaseTemplate
 
   @database_filename "tmp/testdb"
   @collection_filename "tmp/testdb_potato"
@@ -15,13 +15,18 @@ defmodule EjdbTest.Coll do
 
     {:ok, db: db}
   end
+end
+
+defmodule EjdbTest.Coll.Create do
+  use EjdbTest.Coll.Template
+  @collection_filename "tmp/testdb_potato"
 
   test "create collection returns {:ok, collection}", context do
     {:ok, coll} = Ejdb.create_collection context.db, "potato"
     assert is_reference coll
   end
 
-  test "create a collection file", context do
+  test "create collection file", context do
     {:ok, _} = Ejdb.create_collection context.db, "potato"
     assert File.exists?(@collection_filename), "Collection file not created"
   end
@@ -58,6 +63,22 @@ defmodule EjdbTest.Coll do
   test "create collection with invalid options", context do
     {:ok, _} = Ejdb.create_collection context.db, "potato", [42, {42}, {42, 42}]
   end
+end
+
+defmodule EjdbTest.Coll.Get do
+  use EjdbTest.Coll.Template
+
+  test "get collection with wrong database" do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.get_collection "spam", "potato"
+    end
+  end
+
+  test "get collection with wrong collection", context do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.get_collection context.db, 42
+    end
+  end
 
   test "get a non existent collection", context do
     {:error, msg} = Ejdb.get_collection context.db, "potato"
@@ -69,7 +90,17 @@ defmodule EjdbTest.Coll do
     {:ok, coll} = Ejdb.get_collection context.db, "potato"
     assert is_reference coll
   end
+end
 
+defmodule EjdbTest.Coll.GetAll do
+  use EjdbTest.Coll.Template
+
+  test "get collections with wrong database" do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.get_collections "spam"
+    end
+  end
+  
   test "get all collections (no collections)", context do
     [] = Ejdb.get_collections context.db
   end
@@ -79,12 +110,38 @@ defmodule EjdbTest.Coll do
 
     [_] = Ejdb.get_collections context.db
   end
+end
+
+defmodule EjdbTest.Coll.Remove do
+  use EjdbTest.Coll.Template
+
+  test "Remove collection wrong database parameter" do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.remove_collection "spam", "potato", true
+    end
+  end
+
+  test "Remove collection wrong collection parameter", context do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.remove_collection context.db, 42, true
+    end
+  end
+
+  test "Remove collection wrong unlink parameter", context do
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.remove_collection context.db, "potato", "spam"
+    end
+  end
 
   test "Remove collection", context do
     {:ok, _} = Ejdb.create_collection context.db, "potato"
     :ok = Ejdb.remove_collection context.db, "potato", true
     [] = Ejdb.get_collections context.db
   end
+end
+
+defmodule EjdbTest.Coll.Save do
+  use EjdbTest.Coll.Template
 
   test "save to a collection", context do
     {:ok, coll} = Ejdb.create_collection(context.db, "potato")

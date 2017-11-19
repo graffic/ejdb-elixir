@@ -20,6 +20,10 @@ defmodule EjdbTest.DB do
     end
   end
 
+  test "create db wrong option in list" do
+    {:error, _} = Ejdb.open @database_filename, [42]
+  end
+
   test "create db no options" do
     {:error, _} = Ejdb.open @database_filename, []
   end
