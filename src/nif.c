@@ -9,6 +9,7 @@ nif_functions[] = {
       { "create_collection", 3, nif_ejdb_createcoll },
       { "get_collection", 2, nif_ejdb_getcoll },
       { "get_collections", 1, nif_ejdb_getcolls },
+      { "remove_collection", 3, nif_ejdb_rmcoll },
       { "save_bson", 2, nif_ejdb_savebson }
 };
 

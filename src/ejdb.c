@@ -3,11 +3,12 @@
 #include <string.h>
 #include "ejdb.h"
 #include "utils.h"
+#include "nif_args.h"
 
 ErlNifResourceType *DB_RESOURCE_TYPE;
 
 ERL_NIF_TERM
-nif_ejdb_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_version(NIF_FUNC_ARGS) {
     return char_to_binary(env, ejdbversion());
 }
 
@@ -60,16 +61,10 @@ ejdb_error_tuple(ErlNifEnv* env, DbResource *db) {
 }
 
 ERL_NIF_TERM
-nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    ErlNifBinary argv_0;
-    if (!enif_inspect_binary(env, argv[0], &argv_0)) {
-        return enif_make_badarg(env);
-    }
+nif_ejdb_open(NIF_FUNC_ARGS) {
+    ARG_BINARY(argv_0, 0)
 
-    if(!enif_is_list(env, argv[1]))
-    {
-        return enif_make_badarg(env);
-    }
+    ARG_LIST(1)
     unsigned int mode = parse_db_opts(env, argv[1]);
 
     EJDB *db = ejdbnew();
@@ -84,7 +79,10 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     if (!did_open) {
         // Return tuple { :error, "message"}
         DbResource tmp = {db};
-        return ejdb_error_tuple(env, &tmp);
+        ERL_NIF_TERM ret = ejdb_error_tuple(env, &tmp);
+        
+        ejdbdel(db);
+        return ret;
     }
     DbResource *resource = enif_alloc_resource(DB_RESOURCE_TYPE, sizeof(DbResource));
     resource->db = db;
@@ -96,7 +94,7 @@ nif_ejdb_open(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 }
 
 ERL_NIF_TERM
-nif_ejdb_close(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_close(NIF_FUNC_ARGS) {
     ARG_DB_RESOURCE(dbr, 0)
     bool closed = ejdbclose(dbr->db);
 

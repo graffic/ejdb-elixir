@@ -17,6 +17,9 @@ nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM
 nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
+ERL_NIF_TERM
+nif_ejdb_rmcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+
 /**
  * Save a marshalled bson into a collection
  */

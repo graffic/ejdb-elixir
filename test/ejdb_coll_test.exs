@@ -80,6 +80,12 @@ defmodule EjdbTest.Coll do
     [_] = Ejdb.get_collections context.db
   end
 
+  test "Remove collection", context do
+    {:ok, _} = Ejdb.create_collection context.db, "potato"
+    :ok = Ejdb.remove_collection context.db, "potato", true
+    [] = Ejdb.get_collections context.db
+  end
+
   test "save to a collection", context do
     {:ok, coll} = Ejdb.create_collection(context.db, "potato")
 

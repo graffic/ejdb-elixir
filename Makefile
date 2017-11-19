@@ -2,7 +2,7 @@ MIX=mix
 CC=clang
 LIBEJDB_PATH=deps/libejdb
 LIBEJDB_INSTALL=$(LIBEJDB_PATH)/install_prefix
-CFLAGS = -std=c99 -pedantic -Wall
+CFLAGS = -std=c11 -pedantic -Wall
 
 ifeq ($(COVERAGE),true)
 	# LLVM
@@ -33,7 +33,7 @@ ifneq ($(OS),Windows_NT)
 endif
 
 
-.PHONY: libejdb clean
+.PHONY: libejdb clean_priv clean
 
 libejdb:
 	cd $(LIBEJDB_PATH) && \
@@ -49,9 +49,11 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 priv/ejdb.so: $(OBJS)
 	$(CC) $(CFLAGS) -shared $(LDFLAGS) -o $@ $^ $(LIBEJDB_INSTALL)/lib/libejdb-1.a
 
-clean:
+clean_priv:
+	rm -rf priv/ejdb.so priv/*.o priv/*.gcda priv/*.gcno
+	rm -f *.gcov
+
+clean: clean_priv
 	$(MIX) clean
 	make -C $(LIBEJDB_PATH)/build clean
 	rm -rf $(LIBEJDB_INSTALL)
-	rm -rf priv/ejdb.so priv/*.o priv/*.gcda priv/*.gcno
-	rm *.gcov

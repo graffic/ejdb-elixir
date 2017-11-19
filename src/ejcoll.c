@@ -4,6 +4,7 @@
 #include <erl_nif.h>
 #include "ejdb.h"
 #include "utils.h"
+#include "nif_args.h"
 
 ErlNifResourceType* COLL_RESOURCE_TYPE;
 
@@ -14,16 +15,9 @@ typedef struct {
 
 
 ERL_NIF_TERM
-nif_ejdb_savebson(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-    CollResource *res;
-    if(!enif_get_resource(env, argv[0], COLL_RESOURCE_TYPE, (void**) &res)) {
-        return enif_make_badarg(env);
-    }
-
-    ErlNifBinary bson_arg;
-    if (!enif_inspect_binary(env, argv[1], &bson_arg)) {
-        return enif_make_badarg(env);
-    }
+nif_ejdb_savebson(NIF_FUNC_ARGS) {
+    ARG_COLL_RESOURCE(res, 0)
+    ARG_BINARY(bson_arg, 1)
 
     bson_oid_t oid;
     ejdbsavebson3(res->coll, bson_arg.data, &oid, false);
@@ -113,14 +107,9 @@ tuple_with_coll(ErlNifEnv *env, DbResource *db, EJCOLL *coll) {
     );
 }
 
-#define ARG_BINARY(dest, index) \
-    ErlNifBinary dest; \
-    if (!enif_inspect_binary(env, argv[index], &argv_1)) {\
-        return enif_make_badarg(env);\
-    }
 
 ERL_NIF_TERM
-nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_getcolls(NIF_FUNC_ARGS) {
     ARG_DB_RESOURCE(dbr, 0)
 
     TCLIST *colls = ejdbgetcolls(dbr->db);
@@ -137,7 +126,7 @@ nif_ejdb_getcolls(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 }
 
 ERL_NIF_TERM
-nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_getcoll(NIF_FUNC_ARGS) {
     ARG_DB_RESOURCE(dbr, 0)
     ARG_BINARY(argv_1, 1)
 
@@ -146,25 +135,18 @@ nif_ejdb_getcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     enif_free(coll_name);
 
     if(coll == NULL) {
-        return enif_make_tuple2(
-            env,
-            mk_atom(env, "error"),
-            char_to_binary(env, "Collection does not exist")
-        );
+        return ERROR_MSG_TUPLE(env, "Collection does not exist");
     }
 
     return tuple_with_coll(env, dbr, coll);
 }
 
 ERL_NIF_TERM
-nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+nif_ejdb_createcoll(NIF_FUNC_ARGS) {
     ARG_DB_RESOURCE(dbr, 0)
     ARG_BINARY(argv_1, 1)
+    ARG_LIST(2)
 
-    if(!enif_is_list(env, argv[2]))
-    {
-        return enif_make_badarg(env);
-    }
     EJCOLLOPTS empty_opts = {0};
     EJCOLLOPTS *opts = parse_coll_opts(env, &empty_opts, argv[2]);
 
@@ -179,10 +161,22 @@ nif_ejdb_createcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
     return tuple_with_coll(env, dbr, coll);
 }
 
-// ERL_NIF_TERM
-// nif_ejdb_rmcoll(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-//     return enif_make_badarg(env);
-// }
+ERL_NIF_TERM
+nif_ejdb_rmcoll(NIF_FUNC_ARGS) {
+    ARG_DB_RESOURCE(dbr, 0)
+    ARG_BINARY(argv_1, 1)
+    
+    char unlink_atom[6];
+    if(!enif_get_atom(env, argv[2], unlink_atom, 6, ERL_NIF_LATIN1)) {
+        return enif_make_badarg(env);
+    }
+    char *coll_name = binary_to_char(&argv_1);
+    bool unlink = strcmp(unlink_atom, "true") == 0;
+
+    bool res = ejdbrmcoll(dbr->db, coll_name, unlink);
+    enif_free(coll_name);
+    return res ? mk_atom(env, "ok") : mk_atom(env ,"error");
+}
 
 static void
 free_coll_resource(ErlNifEnv *env, void *resource) {
