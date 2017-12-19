@@ -7,14 +7,23 @@
 
 #include <erl_nif.h>
 
+/**
+ * Makes a tuple with an atom and a string message
+ */ 
 #define ATOM_MSG_TUPLE(env, atom, msg)  enif_make_tuple2(\
         env,\
         mk_atom(env, atom),\
         char_to_binary(env, msg)\
     )
 
+/**
+ * Makes a tuple with the error atom and a message
+ */ 
 #define ERROR_MSG_TUPLE(env, msg) ATOM_MSG_TUPLE(env, "error", msg)
 
+/**
+ * NIF Function arguments
+ */ 
 #define NIF_FUNC_ARGS ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]
 
 /**

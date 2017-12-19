@@ -10,7 +10,8 @@ nif_functions[] = {
       { "get_collection", 2, nif_ejdb_getcoll },
       { "get_collections", 1, nif_ejdb_getcolls },
       { "remove_collection", 3, nif_ejdb_rmcoll },
-      { "save_bson", 2, nif_ejdb_savebson }
+      { "save_bson", 2, nif_ejdb_savebson },
+      { "load_bson", 2, nif_ejdb_loadbson }
 };
 
 static int

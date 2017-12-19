@@ -56,5 +56,9 @@ defmodule Ejdb do
   def save_bson(collection, bson)
   def save_bson(_, _), do: missing_nif()
 
+  @doc "Load bson using `oid` from collection"
+  def load_bson(collection, oid)
+  def load_bson(_, _), do: missing_nif()
+
   defp missing_nif, do: raise "Missing NIF"
 end

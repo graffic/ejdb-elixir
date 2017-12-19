@@ -13,6 +13,37 @@ typedef struct {
     EJCOLL *coll;
 } CollResource;
 
+ERL_NIF_TERM
+nif_ejdb_loadbson(NIF_FUNC_ARGS) {
+    ARG_COLL_RESOURCE(res, 0)
+    ARG_BINARY(bin_oid, 1)
+
+    // We need a good oid, the check could be better
+    if(bin_oid.size != 24) {
+        enif_make_badarg(env);
+    }
+
+    char* char_oid = binary_to_char(&bin_oid);
+    bson_oid_t oid;
+    bson_oid_from_string(&oid, char_oid);
+    enif_free(char_oid);
+
+    bson* data = ejdbloadbson(res->coll, &oid);
+    if (data == NULL) {
+        return mk_atom(env, "not_found");
+    }
+
+    ErlNifBinary result;
+    enif_alloc_binary(data->dataSize, &result);
+    memcpy(result.data, data->data,data->dataSize);
+    bson_free(data);
+
+    return enif_make_tuple2(
+        env,
+        mk_atom(env, "ok"),
+        enif_make_binary(env, &result)
+    );
+}
 
 ERL_NIF_TERM
 nif_ejdb_savebson(NIF_FUNC_ARGS) {

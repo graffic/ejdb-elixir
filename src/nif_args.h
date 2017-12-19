@@ -33,11 +33,11 @@
         return enif_make_badarg(env);\
     }
 
-// #define ARG_STRING(dest, index) \
-//     ErlNifBinary P99_LINEID(binary); \
-//     if (!enif_inspect_binary(env, argv[index], &P99_LINEID(binary))) {\
-//         return enif_make_badarg(env);\
-//     }\
-//     char *dest = binary_to_char(P99_LINEID(binary))
+#define ARG_STRING(dest, index) \
+    ErlNifBinary P99_LINEID(); \
+    if (!enif_inspect_binary(env, argv[index], &P99_LINEID(binary))) {\
+        return enif_make_badarg(env);\
+    }\
+    char *dest = binary_to_char(P99_LINEID())
 
 #endif

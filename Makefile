@@ -32,8 +32,19 @@ ifneq ($(OS),Windows_NT)
 	endif
 endif
 
+.PHONY: libejdb clean_coverage clean_priv clean
 
-.PHONY: libejdb clean_priv clean
+clean_coverage:
+	rm -f *.gcov priv/*.gcda priv/*.gcno
+
+clean_priv: clean_coverage
+	rm -r priv/*.o
+	rm -rf priv/ejdb.so
+
+clean: clean_priv
+	$(MIX) clean
+	make -C $(LIBEJDB_PATH)/build clean
+	rm -rf $(LIBEJDB_INSTALL)
 
 libejdb:
 	cd $(LIBEJDB_PATH) && \
@@ -49,11 +60,3 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 priv/ejdb.so: $(OBJS)
 	$(CC) $(CFLAGS) -shared $(LDFLAGS) -o $@ $^ $(LIBEJDB_INSTALL)/lib/libejdb-1.a
 
-clean_priv:
-	rm -rf priv/ejdb.so priv/*.o priv/*.gcda priv/*.gcno
-	rm -f *.gcov
-
-clean: clean_priv
-	$(MIX) clean
-	make -C $(LIBEJDB_PATH)/build clean
-	rm -rf $(LIBEJDB_INSTALL)

@@ -13,7 +13,7 @@ defmodule EjdbTest.Coll.Template do
       Ejdb.close(db)
     end
 
-    {:ok, db: db}
+    {:ok, db: db, bson: Bson.encode %{spam: "eggs"}}
   end
 end
 
@@ -168,6 +168,30 @@ defmodule EjdbTest.Coll.Save do
 
     assert_raise ArgumentError, "argument error", fn ->
       Ejdb.save_bson coll, 42
+    end
+  end
+end
+
+defmodule EjdbTest.Coll.Load do
+  use EjdbTest.Coll.Template
+
+  test "Load a saved bson from with specified `oid`", context do
+    {:ok, coll} = Ejdb.create_collection context.db, "potato"
+    {:ok, oid} = Ejdb.save_bson coll, context.bson
+    {:ok, bson} = Ejdb.load_bson coll, oid
+    assert "eggs" == Bson.decode(bson).spam
+  end
+
+  test "Load from non existing `oid`", context do
+    {:ok, coll} = Ejdb.create_collection context.db, "potato"
+    :not_found = Ejdb.load_bson coll, "123456789012345678901234"
+  end
+
+  test "Load with wrong oid", context do
+    {:ok, coll} = Ejdb.create_collection context.db, "potato"
+
+    assert_raise ArgumentError, "argument error", fn ->
+      Ejdb.load_bson coll, "12"
     end
   end
 end
